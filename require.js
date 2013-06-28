@@ -10,8 +10,8 @@
 
 var requirejs, require, define;
 (function (global) {
-    var req, s, head, baseElement, dataMain, src,
-        interactiveScript, currentlyAddingScript, mainScript, subPath,
+    var req, s, head, baseElement, dataMain, src, configMain,
+        interactiveScript, currentlyAddingScript, mainScript, configScript, subPath,
         version = '2.1.6',
         commentRegExp = /(\/\*([\s\S]*?)\*\/|([^:]|^)\/\/(.*)$)/mg,
         cjsRequireRegExp = /[^.]\s*require\s*\(\s*["']([^'"\s]+)["']\s*\)/g,
@@ -1931,7 +1931,7 @@ var requirejs, require, define;
                 if (!cfg.baseUrl) {
                     //Pull off the directory of data-main for use as the
                     //baseUrl.
-                    src = mainScript.split('/');
+                    src = dataMain.split('/');
                     mainScript = src.pop();
                     subPath = src.length ? src.join('/')  + '/' : './';
 
@@ -1949,6 +1949,28 @@ var requirejs, require, define;
 
                 //Put the data-main script in the files to load.
                 cfg.deps = cfg.deps ? cfg.deps.concat(mainScript) : [mainScript];
+                
+                //Look for a data-main attribute to set main script for the page
+                //to load. If it is there, the path to data main becomes the
+                //baseUrl, if it is not already set.
+                configMain = script.getAttribute('config-main');
+                
+                if (configMain) {
+                   //Pull off the directory of config-main for use as the
+                   //baseUrl.
+                   src = configMain.split('/');
+                   configScript = src.pop();
+                   configMain = configScript;
+
+                   //Strip off any trailing .js since configMain is now
+                   //like a module name.
+                   configMain = configMain.replace(jsSuffixRegExp, '');
+
+                   console.log(configMain);
+                   
+                   //Put the config-main script in the files to load.
+                   cfg.deps = cfg.deps ? cfg.deps.concat(configMain) : [configMain];
+               }
 
                 return true;
             }
